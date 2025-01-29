@@ -4,17 +4,20 @@ import History from '../screens/History';
 import Profile from "../screens/Profile"
 import  Ionicons from 'react-native-vector-icons/Ionicons'; 
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import AddMedication from '../screens/AddMedition';
 export type RootStackParamAppList = {
     Home:undefined,
     History:undefined,
-    Profile:undefined
+    Profile:undefined,
+    AddMedication:undefined,
+    Tabs: undefined, 
 }
-
 const Tab = createBottomTabNavigator<RootStackParamAppList>();
+const Stack = createNativeStackNavigator< RootStackParamAppList>();
 
-export function  AppStack(){
-    return (
-        <Tab.Navigator screenOptions={{ headerTitleAlign: 'center',headerShown:false }}>
+function TabNavigator() {
+  return (
+    <Tab.Navigator screenOptions={{ headerTitleAlign: 'center', headerShown: false }}>
       <Tab.Screen 
         name="Home" 
         component={Home} 
@@ -43,6 +46,14 @@ export function  AppStack(){
         }}
       />
     </Tab.Navigator>
+  );
+}
 
-    )
+export function AppStack() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false,headerBackButtonDisplayMode:'default' }}>
+      <Stack.Screen name="Tabs" component={TabNavigator} />
+      <Stack.Screen name="AddMedication" component={AddMedication} />
+    </Stack.Navigator>
+  );
 }

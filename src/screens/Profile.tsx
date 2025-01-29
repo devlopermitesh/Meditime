@@ -2,7 +2,7 @@ import { Alert, FlatList, Image, StyleSheet, Text, TouchableOpacity, useWindowDi
 import Ionicons from "react-native-vector-icons/FontAwesome5"
 import React, { useContext, useEffect, useState } from 'react'
 import { AppwriteContext } from '../Appwrite/AppwriteContext'
-
+import {urls} from "../Images/Url"
 type UserObj = {
   name: String;
   email: String;
@@ -116,7 +116,7 @@ paddingVertical:10,
       <Text style={{color:"black",fontSize:30,fontWeight:"700",backgroundColor:"white",marginRight:"auto",marginLeft:10}}>Profile</Text>
 
       <View style={[styles.imagecontainer,{height:height*0.3,width:width*0.98}]}>
-        <Image source={require("../Images/Profile.png")} style={styles.image} />
+        <Image source={{uri:urls.HappyEmoji}} style={styles.image} />
       <Text style={{color:'black',fontFamily:"800",fontSize:20}}>{userData?.name}</Text>
       <Text style={{color:"gray",fontFamily:"400",fontSize:12}}>{userData?.email}</Text>
   </View>

@@ -4,7 +4,7 @@ import React from 'react'
 const Loading = () => {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Appwrite</Text>
+      <Text style={styles.title}>Medicate</Text>
       <ActivityIndicator size="large" color="#1d9bf0" style={styles.loader} />
       <Text style={styles.subtitle}>Loading...</Text>
     </View>
@@ -33,6 +33,7 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 24,
         fontWeight: 'bold',
+        color:"skyblue",
         marginBottom: 10
     },
     loader: {
