@@ -1,4 +1,5 @@
 interface Urls {
+    historyWallpaper: string;
     addmedicationImage: string;
     Onboadingimage1: string;
     Onboadingimage2: string;
@@ -15,9 +16,11 @@ interface Urls {
     Tablet: string;
     HappyEmoji: string;
     StarShine: string;
+    ReminderImage:string;
 }
 
 export const urls: Urls = {
+    historyWallpaper:"https://cloud.appwrite.io/v1/storage/buckets/67961baa002bfceb5112/files/679cc937002f75fac8c8/view?project=67931955001bf8d77d19",
     addmedicationImage: "https://cloud.appwrite.io/v1/storage/buckets/67961baa002bfceb5112/files/679710520034c8bbded7/view?project=67931955001bf8d77d19&project=67931955001bf8d77d19",
     Onboadingimage1: "https://cloud.appwrite.io/v1/storage/buckets/67961baa002bfceb5112/files/67970fd8001f3b9be146/view?project=67931955001bf8d77d19&project=67931955001bf8d77d19",
     Onboadingimage2: "https://cloud.appwrite.io/v1/storage/buckets/67961baa002bfceb5112/files/67970f90000540b7cf7c/view?project=67931955001bf8d77d19&project=67931955001bf8d77d19",
@@ -33,6 +36,7 @@ export const urls: Urls = {
     Syrup: "https://cloud.appwrite.io/v1/storage/buckets/67961baa002bfceb5112/files/67970ac6000ecb4abb5e/view?project=67931955001bf8d77d19&project=67931955001bf8d77d19",
     Tablet: "https://cloud.appwrite.io/v1/storage/buckets/67961baa002bfceb5112/files/67961c53000ba7623968/view?project=67931955001bf8d77d19&project=67931955001bf8d77d19",
     HappyEmoji: "https://cloud.appwrite.io/v1/storage/buckets/67961baa002bfceb5112/files/679716d30029a5b931f9/view?project=67931955001bf8d77d19&project=67931955001bf8d77d19",
-    StarShine: "https://cloud.appwrite.io/v1/storage/buckets/67961baa002bfceb5112/files/6797170600259b9bd361/view?project=67931955001bf8d77d19&project=67931955001bf8d77d19"
+    StarShine: "https://cloud.appwrite.io/v1/storage/buckets/67961baa002bfceb5112/files/6797170600259b9bd361/view?project=67931955001bf8d77d19&project=67931955001bf8d77d19",
+    ReminderImage:"https://cloud.appwrite.io/v1/storage/buckets/67961baa002bfceb5112/files/679cfd730000727f7ee4/view?project=67931955001bf8d77d19&project=67931955001bf8d77d19"
 };
 

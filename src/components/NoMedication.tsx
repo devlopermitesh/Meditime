@@ -1,4 +1,4 @@
-import { Image, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native'
+import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native'
 import React from 'react'
 import { useNavigation } from '@react-navigation/native';
 import {urls} from "../Images/Url"

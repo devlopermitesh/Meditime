@@ -6,7 +6,7 @@ interface Props {
 }import { TouchableOpacity } from 'react-native'
 
 const TypeOption:React.FC<Props> = ({Options,onOptionSelect}) => {
-    const [activeOption, setActiveOption] = React.useState<string | null>(null);
+    const [activeOption, setActiveOption] = React.useState<string>('Tablet');
 
     const handleOptionSelect = (option: string) => {
         setActiveOption(option);

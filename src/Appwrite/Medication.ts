@@ -1,12 +1,27 @@
-import { Client, Databases, Query } from "appwrite";
+import { Client, Databases, ID, Query } from "appwrite";
 import Config from "react-native-config";
+const getProjectConfig = (): { url: string, projectId: string, databaseId: string, collectionId: string } => {
+  const url = Config.APPWRITE_PROJECT_NAME!;
+  const projectId = Config.APPWRITE_PROJECT_ID!;
+  const databaseId = Config.APPWRITE_DATABASE_ID!;
+  const collectionId = Config.APPWRITE_COLLECTION_ID!;
 
-const APPWRITE_PROJECT_URL: string = Config.APPWRITE_PROJECT_URL!;
-const APPWRITE_PROJECT_ID: string = Config.APPWRITE_PROJECT_ID!;
-const APPWRITE_DATABASE_ID: string = Config.APPWRITE_DATABASE_ID!;
-const APPWRITE_COLLECTION_ID: string = Config.APPWRITE_COLLECTION_ID!;
+  const missingKeys = [];
+  if (!url) missingKeys.push('APPWRITE_PROJECT_URL');
+  if (!projectId) missingKeys.push('APPWRITE_PROJECT_ID');
+  if (!databaseId) missingKeys.push('APPWRITE_DATABASE_ID');
+  if (!collectionId) missingKeys.push('APPWRITE_COLLECTION_ID');
 
-enum WhenToTake {
+  if (missingKeys.length > 0) {
+    throw new Error(`Missing Appwrite project configuration in .env file: ${missingKeys.join(', ')}`);
+  }
+
+  return { url, projectId, databaseId, collectionId };
+};
+
+const { url: APPWRITE_PROJECT_URL, projectId: APPWRITE_PROJECT_ID, databaseId: APPWRITE_DATABASE_ID, collectionId: APPWRITE_COLLECTION_ID } = getProjectConfig();
+
+export enum WhenToTake {
   Morning = 'Morning',
   Afternoon = 'Afternoon',
   Evening = 'Evening',
@@ -22,8 +37,7 @@ enum WhenToTake {
   AsNeeded = 'As Needed', 
   Custom = 'Custom'
 }
-
-enum MedicationForm {
+export enum MedicationForm {
   Tablet = 'Tablet',
   Syrup = 'Syrup',
   Drops = 'Drops',
@@ -34,19 +48,22 @@ enum MedicationForm {
   Patch = 'Patch',
 }
 
-interface Medication {
-  id: string;
+export interface Medication {
+  $id?: string;
   Name: string;
-  DosageForms: MedicationForm;
+  DosageForms: MedicationForm; 
   Dose: string;
-  WhentoTake: WhenToTake;
-  DoseStartTime: Date;
-  DoseEndTime: Date;
+  WhentoTake: string; 
+  DosestartTime: Date;
+  DoseEndTime: Date; 
   ReminderTime: Date;
-  Taken: boolean;
+  NeedReminder: boolean;
+  Todaystatus?: boolean;
+  userId:string|null ,
+  ImageUrl:string
 }
 
-class MedicationManager {
+export class MedicationManager {
   database: Databases;
 
   constructor() {
@@ -60,7 +77,7 @@ class MedicationManager {
       const medication = await this.database.createDocument(
         APPWRITE_DATABASE_ID,
         APPWRITE_COLLECTION_ID,
-        data.id,
+        ID.unique(),
         data
       );
       return { data: medication };
@@ -98,9 +115,15 @@ class MedicationManager {
   }
 
   // Get all medications
-  async getAllMedications(): Promise<any> {
+  async getAllMedications(userId:string): Promise<any> {
     try {
-      const medications = await this.database.listDocuments(APPWRITE_DATABASE_ID, APPWRITE_COLLECTION_ID);
+      const medications = await this.database.listDocuments(
+        APPWRITE_DATABASE_ID,
+        APPWRITE_COLLECTION_ID,
+        [
+          Query.equal('userId', userId)
+        ]
+      );
       return { data: medications.documents };
     } catch (error) {
       console.log("Error fetching medications:", error);
@@ -108,31 +131,33 @@ class MedicationManager {
     }
   }
 
-  // Get today's medications
-  async getTodayMedications(): Promise<any> {
+  // Get Date's medications
+  async getdateMedications(userId: string, startdate: Date, enddate: Date): Promise<any> {
     try {
-      const today = new Date();
+      console.log("start date", startdate.toISOString().replace('Z', '+00:00'), "end date", enddate.toISOString().replace('Z', '+00:00')); 
+  
       const medications = await this.database.listDocuments(APPWRITE_DATABASE_ID, APPWRITE_COLLECTION_ID, [
-        Query.equal('DoseStartTime', today.toISOString()), // Filter based on today's date (example)
+        Query.equal('userId', userId), // Filter by userId
+        Query.greaterThan('DosestartTime', startdate.toISOString().replace('Z', '+00:00')),
+        Query.lessThan('DosestartTime', enddate.toISOString().replace('Z', '+00:00'))
       ]);
-      return { data: medications.documents };
+  
+      return medications.documents;
     } catch (error) {
       console.log("Error fetching today's medications:", error);
       return { error: error };
     }
   }
-
+  
   // Toggle medication taken status
-  async toggleMedicationTakenStatus(id: string, currentStatus: boolean): Promise<any> {
+  async MedicationTaken(id: string): Promise<any> {
     try {
-      const updatedMedication = {
-        Taken: !currentStatus, // Toggle the status (true becomes false and vice versa)
-      };
+     
       const response = await this.database.updateDocument(
         APPWRITE_DATABASE_ID,
         APPWRITE_COLLECTION_ID,
         id,
-        updatedMedication
+        { Todaystatus:true }
       );
       return { data: response };
     } catch (error) {
@@ -140,6 +165,15 @@ class MedicationManager {
       return { error: error };
     }
   }
+  async getMedicationItem(id: string): Promise<any> {
+   try {
+   const response=await this.database.getDocument(APPWRITE_DATABASE_ID, APPWRITE_COLLECTION_ID, id); 
+   return { data: response };
+   } catch (error) {
+    console.log("Error fetching item:", error);
+    return { error: error };
+   } 
+  }
 }
+export const MedicationService = new MedicationManager();
 
-export default new MedicationManager();

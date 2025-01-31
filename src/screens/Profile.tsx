@@ -3,6 +3,9 @@ import Ionicons from "react-native-vector-icons/FontAwesome5"
 import React, { useContext, useEffect, useState } from 'react'
 import { AppwriteContext } from '../Appwrite/AppwriteContext'
 import {urls} from "../Images/Url"
+import { useUser } from '../Store/users'
+import { createNativeStackNavigator, NativeStackScreenProps } from '@react-navigation/native-stack'
+import { RootStackParamAppList } from '../routes/AppStack'
 type UserObj = {
   name: String;
   email: String;
@@ -51,41 +54,33 @@ const ListOptions:listoption[]=[
 
 
 
-
-const Profile = () => {
+type ProfleScreenProps=NativeStackScreenProps<RootStackParamAppList,'Profile'>
+const Profile = ({ navigation }: ProfleScreenProps) => {
   const {width,height}=useWindowDimensions()
-  const [userData, setUserData] = useState<UserObj>()
+  const {user}=useUser()
   const {appwrite, setIsloggedIn} = useContext(AppwriteContext)
 
   const handleLogout = () => {
     appwrite.logout()
     .then(() => {
+      
       setIsloggedIn(false);
       
     })
   }
 
-   useEffect(() => {
-      appwrite.getUser()
-      .then(response => {
-        if (response) {
-          const user: UserObj = {
-            name: response.name,
-            email: response.email
-          }
-          setUserData(user)
-        }
-      })
-    }, [appwrite])
-    
+   
 
     const handlePress=({name}:{name:Name})=>{
       switch (name) {
         case Name.ADDmedicine:
+          navigation.navigate("AddMedication")
           break;
         case Name.MyMedications:
+          navigation.navigate('Home')
           break;
         case Name.History:
+          navigation.navigate('History')
           break;
         case Name.logout:
           Alert.alert("Medicate","Are you sure you want to logout?",[{text:"Yes",onPress:handleLogout},{text:"No"}])
@@ -117,8 +112,8 @@ paddingVertical:10,
 
       <View style={[styles.imagecontainer,{height:height*0.3,width:width*0.98}]}>
         <Image source={{uri:urls.HappyEmoji}} style={styles.image} />
-      <Text style={{color:'black',fontFamily:"800",fontSize:20}}>{userData?.name}</Text>
-      <Text style={{color:"gray",fontFamily:"400",fontSize:12}}>{userData?.email}</Text>
+      <Text style={{color:'black',fontFamily:"800",fontSize:20}}>{user?.name}</Text>
+      <Text style={{color:"gray",fontFamily:"400",fontSize:12}}>{user?.email}</Text>
   </View>
   <FlatList 
     renderItem={Itemoption} 
