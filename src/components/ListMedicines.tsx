@@ -48,7 +48,7 @@ const ListMedicines = () => {
   return (
     <View style={styles.container}>
       {Medicines && Medicines.length > 0 ? (
-        Medicines.map((item) => renderItem({item, navigation})) // Map through the data and render each item manually
+Medicines.map((item) => renderItem({item, navigation})) // Map through the data and render each item manually
       ) : (
         <Text>No Medicines Available</Text>
       )}

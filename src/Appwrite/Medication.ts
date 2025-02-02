@@ -130,25 +130,63 @@ export class MedicationManager {
       return { error: error };
     }
   }
-
-  // Get Date's medications
-  async getdateMedications(userId: string, startdate: Date, enddate: Date): Promise<any> {
+  async setCurrentTaken(data: any[]): Promise<any[]> {
     try {
-      console.log("start date", startdate.toISOString().replace('Z', '+00:00'), "end date", enddate.toISOString().replace('Z', '+00:00')); 
-  
-      const medications = await this.database.listDocuments(APPWRITE_DATABASE_ID, APPWRITE_COLLECTION_ID, [
-        Query.equal('userId', userId), // Filter by userId
-        Query.greaterThan('DosestartTime', startdate.toISOString().replace('Z', '+00:00')),
-        Query.lessThan('DosestartTime', enddate.toISOString().replace('Z', '+00:00'))
-      ]);
-  
-      return medications.documents;
+        const currentTime = new Date();
+        const medications = data.map(async (itemMedication: Medication) => {
+            try {
+                const reminderTime = new Date(itemMedication.ReminderTime);
+
+                if (reminderTime.getTime() >= currentTime.getTime()) {
+                    if (!itemMedication.$id) return {};
+
+                    return await this.database.updateDocument(
+                        APPWRITE_DATABASE_ID,
+                        APPWRITE_COLLECTION_ID,
+                        itemMedication.$id,
+                        {
+                            Todaystatus: false,
+                        }
+                    );
+                }
+                return itemMedication;
+            } catch (error) {
+                console.error("Error updating medication:", error);
+                return null;
+            }
+        });
+
+        return Promise.all(medications);
     } catch (error) {
-      console.log("Error fetching today's medications:", error);
-      return { error: error };
+        console.error("Error in setCurrentTaken:", error);
+        return [];
     }
-  }
-  
+}
+
+// Get Medications for Specific Date Range
+async getdateMedications(userId: string, startDate: Date, endDate: Date): Promise<any> {
+    try {
+        console.log("Start date:", startDate.toISOString(), "End date:", endDate.toISOString());
+
+        const medications = await this.database.listDocuments(
+            APPWRITE_DATABASE_ID,
+            APPWRITE_COLLECTION_ID,
+            [
+                Query.equal('userId', userId),
+                Query.greaterThan('DosestartTime', startDate.toISOString()),
+                Query.lessThan('DosestartTime', endDate.toISOString())
+            ]
+        );
+
+        const data = await this.setCurrentTaken(medications.documents); // ✅ Await added
+        console.log(`Current date is ${new Date().toISOString()} and your medicines status is`, data);
+        if(data.length===0) return [];
+        return data;
+    } catch (error) {
+        console.error("Error fetching medications:", error);
+    }
+}
+
   // Toggle medication taken status
   async MedicationTaken(id: string): Promise<any> {
     try {
