@@ -19,6 +19,8 @@ useEffect(()=>{
     
   }
 },[])
+
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar />

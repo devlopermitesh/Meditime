@@ -6,6 +6,10 @@ import  Ionicons from 'react-native-vector-icons/Ionicons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import AddMedication from '../screens/AddMedition';
 import TakeMedicine from '../screens/TakeMedicine';
+import { useContext, useEffect } from 'react';
+import { requestUserPermission, setupOnMessageListener } from '../firebasenotificationSetup';
+import { AppwriteContext } from '../Appwrite/AppwriteContext';
+import { useUser } from '../Store/users';
 export type RootStackParamAppList = {
     Home:undefined,
     History:undefined,
@@ -52,6 +56,19 @@ function TabNavigator() {
 }
 
 export function AppStack() {
+  const {appwrite}=useContext(AppwriteContext)
+  const {user}=useUser()
+  useEffect(() => {
+    requestUserPermission().then(async(token) => {
+      if (token) {
+        console.log("FCM Token:", token);
+        await appwrite.SelectTarget(user.Id,token)
+      }
+    });
+
+    setupOnMessageListener();
+  }, []);
+
   return (
     <Stack.Navigator screenOptions={{ headerShown: false,headerBackButtonDisplayMode:'default' }}>
       <Stack.Screen name="Tabs" component={TabNavigator} />

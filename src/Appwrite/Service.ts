@@ -78,6 +78,25 @@ class Service {
       throw error; // Re-throw other errors
     }
   }
+  async SelectTarget(targetId: string, token: string) {
+    try {
+      const updateResult = await this.account.updatePushTarget(targetId, token);
+      return updateResult;
+    } catch (updateError: any) {
+      try {
+        const createResult = await this.account.createPushTarget(
+          ID.unique(),
+          token,
+          'fcm'
+        );
+        return createResult;
+      } catch (createError: any) {
+        throw createError;
+      }
+    }
+  }
+  
+  
 }
 
 export default Service;
