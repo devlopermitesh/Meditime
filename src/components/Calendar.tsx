@@ -30,7 +30,7 @@ const Calendar: React.FC = () => {
   const [currentYear] = useState<number>(new Date().getFullYear());
   const currentDate = new Date().getDate().toString();
   const {user}=useUser(state=>state)
-  const {Medication,setMedication}=useMedication(state=>state)
+  const {updateCurrentDate,setMedication}=useMedication(state=>state)
   const [activatedate,setactivateddate]=useState<number>(new Date().getDate())
 
   const daysInMonth = getDaysInMonth(currentYear, currentMonth);
@@ -38,7 +38,7 @@ const Calendar: React.FC = () => {
 
   const handleDate = async (date: number) => {
     const selectedDate = new Date(currentYear, currentMonth, date);
-    
+    updateCurrentDate(selectedDate)
     selectedDate.setHours(23, 59, 59, 999); 
     selectedDate.setDate(selectedDate.getDate()); 
     

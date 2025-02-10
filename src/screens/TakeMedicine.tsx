@@ -18,6 +18,7 @@ const TakeMedicine = ({navigation,route}:DetailsProps) => {
   const {height}=useWindowDimensions()
     const {ID} = route.params
     const {changeStatus}=useMedication(state=>state)
+    const date=useMedication(state=>state.CurrentDate)
     useEffect(()=>{
 async function fetchItem(ID:string) {
   try {
@@ -70,7 +71,7 @@ try {
   if (!item?.userId || !item?.$id || !item?.Name || item?.Todaystatus === undefined) {
     throw new Error("Missing required medication item details");
   }
-  const date = new Date()
+  
   date.setHours(0,0,0,0)
   const localDateString = date.toISOString().split("T")[0];
   console.log("The date i am going to add in Report is ",localDateString)
@@ -141,7 +142,7 @@ try {
                 {(item?.Todaystatus)?"Medicine is already taken 🙂":getMotivationalLine()}
               </Text>
             <View style={styles.itembox}>
-            {item && renderItem({item, navigation:undefined})}
+            {item && renderItem({item, navigation:undefined},date)}
             </View>
             <View style={styles.buttoncontainer}>
             <Pressable 

@@ -14,23 +14,36 @@ import { RootStackParamAppList } from '../routes/AppStack';
 }: {
   item: Medication;
   navigation?: NavigationProp<RootStackParamAppList>;
-}): JSX.Element => (
+},CurrentDate:Date): JSX.Element => (
   <TouchableOpacity
     style={styles.listbox}
     key={item.$id}
     onPress={() =>{
-      const IsPrevious = new Date(item.ReminderTime).getTime() < new Date().setHours(0, 0, 0, 0);
-   if (IsPrevious) {
-        Alert.alert(
-          "⏰ Uh-oh! You can't take medicine in the past! 💕",
-          "",
-          [
-            { text: "OK", onPress: () => {} }
-          ]
-        );
-      } else {
-        navigation && navigation.navigate('TakeMedicine', { ID: item.$id ?? '' });
-      }
+      
+const todayMidnight =CurrentDate.setHours(0, 0, 0, 0);
+const tommorowMidnight=CurrentDate.setHours(23, 0, 0, 0);
+const reminderTime = new Date(item.ReminderTime).getTime();
+
+const IsPrevious = reminderTime < todayMidnight; // Past
+const IsToday = reminderTime >= todayMidnight && reminderTime < tommorowMidnight; // Same Day (Before Current Time)
+const IsFuture = reminderTime >= tommorowMidnight; // Future
+
+if (IsPrevious) {
+  Alert.alert(
+    "⏰ Uh-oh! You can't take medicine before there time! 💕",
+    "",
+    [{ text: "OK", onPress: () => {} }]
+  );
+} else if (IsToday) {
+  navigation && navigation.navigate('TakeMedicine', { ID: item.$id ?? '' });
+} else if (IsFuture) {
+  Alert.alert(
+    "⏳ This medicine is scheduled for a future time!",
+    "",
+    [{ text: "OK", onPress: () => {} }]
+  );
+}
+
       
     } }
   >
@@ -57,12 +70,12 @@ import { RootStackParamAppList } from '../routes/AppStack';
 ));
 
 const ListMedicines = () => {
-  const Medicines = useMedication((state) => state.Medication);
+  const {Medication,CurrentDate} = useMedication((state) => state);
   const navigation: NavigationProp<RootStackParamAppList> = useNavigation();
   return (
     <View style={styles.container}>
-      {Medicines && Medicines.length > 0 ? (
-Medicines.map((item) => renderItem({item, navigation})) // Map through the data and render each item manually
+      {Medication && Medication.length > 0 ? (
+Medication.map((item) => renderItem({item, navigation},CurrentDate)) // Map through the data and render each item manually
       ) : (
         <Text>No Medicines Available</Text>
       )}

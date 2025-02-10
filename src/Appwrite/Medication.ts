@@ -149,8 +149,7 @@ export class MedicationManager {
   
       // Check if reports exist
       const documents = reportDate?.data?.documents ?? [];
-      console.log("document is lentgh",data)
-      if (!documents.length) return data;
+    
   
       // Create a lookup map for MeditionId -> Taken status
       const reportMap = new Map(documents.map((doc: any) => [doc.MeditionId, doc.Taken]));
@@ -176,6 +175,26 @@ export class MedicationManager {
               NeedReminder: medication.NeedReminder,
               Todaystatus: medication.Todaystatus
             };
+  
+            await this.updateMedication(medication.$id as string, updatedData);
+            return medication;
+          }
+          else{
+            medication.Todaystatus = false;
+            const updatedData = {
+              userId: medication.userId,
+              Name: medication.Name,
+              ImageUrl: medication.ImageUrl,
+              DosageForms: medication.DosageForms,
+              Dose: medication.Dose,
+              WhentoTake: medication.WhentoTake,
+              DosestartTime: medication.DosestartTime,
+              DoseEndTime: medication.DoseEndTime,
+              ReminderTime: medication.ReminderTime,
+              NeedReminder: medication.NeedReminder,
+              Todaystatus: medication.Todaystatus
+            };
+            console.log("No Report for this ",updatedData)
   
             await this.updateMedication(medication.$id as string, updatedData);
             return medication;
