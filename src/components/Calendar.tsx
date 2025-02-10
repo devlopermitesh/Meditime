@@ -39,14 +39,14 @@ const Calendar: React.FC = () => {
   const handleDate = async (date: number) => {
     const selectedDate = new Date(currentYear, currentMonth, date);
     
-    const previousDate = new Date(selectedDate);
-    previousDate.setDate(selectedDate.getDate() - 1);
-  
+    selectedDate.setHours(23, 59, 59, 999); 
+    selectedDate.setDate(selectedDate.getDate()); 
+    
     const nextDate = new Date(selectedDate);
     nextDate.setDate(selectedDate.getDate() + 1);
   
     try {
-      const response = await MedicationService.getdateMedications(user.email, previousDate, nextDate);
+      const response = await MedicationService.getdateMedications(user.email, selectedDate, nextDate);
       if (response) {
        setMedication(response)
        setactivateddate(date)

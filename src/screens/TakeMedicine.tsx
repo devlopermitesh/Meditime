@@ -9,6 +9,8 @@ import Snackbar from 'react-native-snackbar'
 import { Medication, MedicationService } from '../Appwrite/Medication'
 import { motivationalLines } from '../constant'
 import useMedication from '../Store/Medication'
+import axios from 'axios';
+import report from '../Appwrite/Report'
 type DetailsProps = NativeStackScreenProps<RootStackParamAppList, "TakeMedicine">
 const getMotivationalLine = ():string => motivationalLines[Math.floor(Math.random() * motivationalLines.length)];
 const TakeMedicine = ({navigation,route}:DetailsProps) => {
@@ -44,12 +46,16 @@ fetchItem(ID)
       return date.toLocaleDateString(); // Default format "mm/dd/yyyy"
     };
 
+
     const Taken=async()=>{
 try {
  
   const response=await MedicationService.MedicationTaken(item?.$id as string)
+  
   if(response){
     changeStatus(response.data)
+    updateReport(true)
+    updatestatus()
     Snackbar.show({text: `Medication marked as ${item?.Todaystatus ? "Not Taken":"Taken" }`, duration: Snackbar.LENGTH_SHORT, backgroundColor: 'green'})
     navigation.goBack()
   }
@@ -58,21 +64,64 @@ try {
 }
 
     }
-    const Missed=()=>{
-      Alert.alert(
-        "Reminder",
-        "You should take care, and take medication on time.",
-        [
-          {
-            text: "OK",
-            onPress: () => navigation.goBack(),
-          },
-        ],
-        { cancelable: false }
-      );
+
+    const updateReport=async(Status:boolean)=>{
+try {
+  if (!item?.userId || !item?.$id || !item?.Name || item?.Todaystatus === undefined) {
+    throw new Error("Missing required medication item details");
+  }
+  const date = new Date()
+  date.setHours(0,0,0,0)
+  const localDateString = date.toISOString().split("T")[0];
+  console.log("The date i am going to add in Report is ",localDateString)
+
+  const addreport = await report.addReport({
+    userId: item.userId,
+    ReportDate: localDateString,
+    MeditionId: item.$id,
+    ReportName: item.Name,
+    Taken: Status
+  });
+  console.log("Report is created",addreport)
+} catch (error) {
+  console.log(error)
+}
+    }
+
+
+    const updatestatus=async()=>{
+      axios.get('https://67a7015fca0d04c760bc.appwrite.global/')
+      .then(response => {
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error);
+      });
 
     }
-    
+    const Missed = async () => {
+      try {
+        Alert.alert(
+          "Reminder",
+          "You should take care, and take medication on time.",
+          [
+            {
+              text: "OK",
+              onPress: () => navigation.goBack(),
+            },
+          ],
+          { cancelable: false }
+        );
+        await updateReport(false);
+      } catch (error) {
+        console.log(error);
+        Alert.alert("Error", "Something went wrong, please try again later", [
+          {
+            text: "OK",
+            onPress: () => {},
+          },
+        ]);
+      }
+    };
 
   return (
     <View style={styles.container}>

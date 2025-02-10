@@ -18,7 +18,8 @@ const HomeContent = () => {
 try {
   if(user.email){
     const startDate = new Date();
-    startDate.setHours(0, 0, 0, 0);
+    startDate.setHours(23, 59, 59, 999);
+
     const endDate = new Date(startDate);
     endDate.setDate(endDate.getDate() + 1);
     const response = await MedicationService.getdateMedications(user.email, startDate, endDate);

@@ -18,7 +18,21 @@ import { RootStackParamAppList } from '../routes/AppStack';
   <TouchableOpacity
     style={styles.listbox}
     key={item.$id}
-    onPress={() => navigation && navigation.navigate('TakeMedicine', { ID: item.$id ?? '' })}
+    onPress={() =>{
+      const IsPrevious = new Date(item.ReminderTime).getTime() < new Date().setHours(0, 0, 0, 0);
+   if (IsPrevious) {
+        Alert.alert(
+          "⏰ Uh-oh! You can't take medicine in the past! 💕",
+          "",
+          [
+            { text: "OK", onPress: () => {} }
+          ]
+        );
+      } else {
+        navigation && navigation.navigate('TakeMedicine', { ID: item.$id ?? '' });
+      }
+      
+    } }
   >
     {item.Todaystatus ? (
       <Icon name="checkmark-circle" size={20} color="#90EE90" />

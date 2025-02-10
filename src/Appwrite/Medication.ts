@@ -1,5 +1,6 @@
 import { Client, Databases, ID, Query } from "appwrite";
 import Config from "react-native-config";
+import report, { Options } from "./Report";
 const getProjectConfig = (): { url: string, projectId: string, databaseId: string, collectionId: string } => {
   const url = Config.APPWRITE_PROJECT_NAME!;
   const projectId = Config.APPWRITE_PROJECT_ID!;
@@ -130,63 +131,104 @@ export class MedicationManager {
       return { error: error };
     }
   }
-  async setCurrentTaken(data: any[]): Promise<any[]> {
+  async setCurrentTaken(setupDate: Date, data: any[]): Promise<any[]> {
     try {
-        const currentTime = new Date();
-        const medications = data.map(async (itemMedication: Medication) => {
-            try {
-                const reminderTime = new Date(itemMedication.ReminderTime);
+      // Normalize date to start of the day
+      const newdate = new Date(setupDate);
+      newdate.setHours(0, 0, 0, 0);
+      
+      const localDateString = newdate.toISOString().split("T")[0]; // "2025-02-10"
 
-                if (reminderTime.getTime() >= currentTime.getTime()) {
-                    if (!itemMedication.$id) return {};
 
-                    return await this.database.updateDocument(
-                        APPWRITE_DATABASE_ID,
-                        APPWRITE_COLLECTION_ID,
-                        itemMedication.$id,
-                        {
-                            Todaystatus: false,
-                        }
-                    );
-                }
-                return itemMedication;
-            } catch (error) {
-                console.error("Error updating medication:", error);
-                return null;
-            }
-        });
-
-        return Promise.all(medications);
+      if (!data.length) return [];
+  
+      // Fetch reports for the first user's first medication
+      const { userId, $id } = data[0];
+      const reportDate = await report.getFilteredReports(userId,localDateString,Options.Date);
+  
+  
+      // Check if reports exist
+      const documents = reportDate?.data?.documents ?? [];
+      console.log("document is lentgh",data)
+      if (!documents.length) return data;
+  
+      // Create a lookup map for MeditionId -> Taken status
+      const reportMap = new Map(documents.map((doc: any) => [doc.MeditionId, doc.Taken]));
+  
+      // Process medications
+      const medicationPromises = data.map(async (medication: Medication) => {
+        try {
+          const takenStatus = reportMap.get(medication.$id);
+          if (takenStatus !== undefined) {
+            medication.Todaystatus = takenStatus;
+  
+  
+            const updatedData = {
+              userId: medication.userId,
+              Name: medication.Name,
+              ImageUrl: medication.ImageUrl,
+              DosageForms: medication.DosageForms,
+              Dose: medication.Dose,
+              WhentoTake: medication.WhentoTake,
+              DosestartTime: medication.DosestartTime,
+              DoseEndTime: medication.DoseEndTime,
+              ReminderTime: medication.ReminderTime,
+              NeedReminder: medication.NeedReminder,
+              Todaystatus: medication.Todaystatus
+            };
+  
+            await this.updateMedication(medication.$id as string, updatedData);
+            return medication;
+          }
+        } catch (error) {
+          console.error("Error updating medication:", error);
+          return null; // In case of error, return null to filter later
+        }
+      });
+  
+      // Await all promises and filter out failed updates
+      const updatedMedications = (await Promise.all(medicationPromises)).filter(Boolean);
+  
+      console.log("Updated Medications:", updatedMedications);
+      return updatedMedications;
     } catch (error) {
-        console.error("Error in setCurrentTaken:", error);
-        return [];
+      console.error("Error in setCurrentTaken:", error);
+      return [];
     }
-}
-
-// Get Medications for Specific Date Range
-async getdateMedications(userId: string, startDate: Date, endDate: Date): Promise<any> {
+  }
+  
+  // Get Medications for Specific Date Range
+  async getdateMedications(userId: string, startDate: Date, endDate: Date): Promise<any[]> {
     try {
-        console.log("Start date:", startDate.toISOString(), "End date:", endDate.toISOString());
+      const start = startDate.getTime();
+      const end = endDate.getTime();
+  
+      const { documents } = await this.database.listDocuments(
+        APPWRITE_DATABASE_ID,
+        APPWRITE_COLLECTION_ID,
+        [Query.equal('userId', userId)],
 
-        const medications = await this.database.listDocuments(
-            APPWRITE_DATABASE_ID,
-            APPWRITE_COLLECTION_ID,
-            [
-                Query.equal('userId', userId),
-                Query.greaterThan('DosestartTime', startDate.toISOString()),
-                Query.lessThan('DosestartTime', endDate.toISOString())
-            ]
-        );
-
-        const data = await this.setCurrentTaken(medications.documents); // ✅ Await added
-        console.log(`Current date is ${new Date().toISOString()} and your medicines status is`, data);
-        if(data.length===0) return [];
-        return data;
+      );
+  
+      // Filter medications
+      const filteredMedications = documents.filter((medication) => {
+        const doseEndTime = new Date(medication.DoseEndTime).getTime();
+        const doseStartTime = new Date(medication.DosestartTime).getTime();
+        return doseEndTime >= end && doseStartTime <= start;
+      });
+  
+      // Fetch current taken status
+      const updatedMedications = await this.setCurrentTaken(startDate, filteredMedications);
+  
+      console.log(`Current date: ${new Date().toISOString()}, Medications Status:`, updatedMedications);
+  
+      return updatedMedications.length ? updatedMedications : [];
     } catch (error) {
-        console.error("Error fetching medications:", error);
+      console.error("Error fetching medications:", error);
+      return [];
     }
-}
-
+  }
+  
   // Toggle medication taken status
   async MedicationTaken(id: string): Promise<any> {
     try {
