@@ -1,9 +1,9 @@
-import { ActivityIndicator, Image, StyleSheet, Text, View } from 'react-native'
+import { ActivityIndicator, Image, StyleSheet, Text, useWindowDimensions, View } from 'react-native'
 import React from 'react'
 
 const Loading = () => {
   return (
-    <View style={styles.container}>
+    <View style={[styles.container,{height:'100%'}]}>
       <Text style={styles.title}>Medicate</Text>
       <ActivityIndicator size="large" color="#1d9bf0" style={styles.loader} />
       <Text style={styles.subtitle}>Loading...</Text>

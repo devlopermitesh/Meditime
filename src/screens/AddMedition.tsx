@@ -15,6 +15,7 @@ import {Picker} from '@react-native-picker/picker';
 import   {Medication, MedicationForm,MedicationService} from '../Appwrite/Medication';
 import Snackbar from 'react-native-snackbar';
 import { useUser } from '../Store/users';
+import useMedication from '../Store/Medication';
 const timeRegex = /^([01]?[0-9]|2[0-3]):([0-5]?[0-9])$/;
 const whenToTakeOptions = [
    'Morning',
@@ -118,6 +119,7 @@ const AddMedition = () => {
     const {width,height}=useWindowDimensions()
      const navigation = useNavigation();
      const [selectedLanguage, setSelectedLanguage] = useState("When To Take");
+     const {AddnewMedition}=useMedication(state=>state)
      const pickerRef = useRef<any>(null);
      const handleAddMedicine=async(values:yup.InferType<typeof schema>)=>{
       //check validation
@@ -137,6 +139,7 @@ const AddMedition = () => {
         const response=await MedicationService.addMedication(data)
         if(response){
           Snackbar.show({text: "Medication added successfully", duration: Snackbar.LENGTH_SHORT, backgroundColor: 'green'})
+          AddnewMedition(response.data)
           navigation.goBack()
         }
       } catch (error:any) {

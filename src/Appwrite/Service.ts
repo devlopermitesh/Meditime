@@ -19,7 +19,6 @@ type SignupParams = {
 
 class Service {
   account: Account;
-
   constructor() {
     appwrite_client.setEndpoint(APPWRITE_PROJECT_URL).setProject(APPWRITE_PROJECT_ID);
     this.account = new Account(appwrite_client);
@@ -78,9 +77,21 @@ class Service {
       throw error; // Re-throw other errors
     }
   }
+
+  async UpdatePref(token:string){
+    try {
+      const updateResult = await this.account.updatePrefs({"token":token});
+      return updateResult;
+    } catch (error) {
+      console.log(error)
+      return null
+    }
+
+  }
   async SelectTarget(targetId: string, token: string) {
     try {
       const updateResult = await this.account.updatePushTarget(targetId, token);
+      await this.UpdatePref(token)
       return updateResult;
     } catch (updateError: any) {
       try {

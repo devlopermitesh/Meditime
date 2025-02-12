@@ -1,5 +1,5 @@
 import { Alert, Image, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { urls } from '../Images/Url'
 import Calender from './Calendar'
 import ListMedicines from './ListMedicines'
@@ -8,14 +8,17 @@ import NoMedication from './NoMedication'
 import Snackbar from 'react-native-snackbar'
 import { MedicationService } from '../Appwrite/Medication'
 import { useUser } from '../Store/users'
+import Loading from '../screens/Loading'
 
 const HomeContent = () => {
     const {width,height}=useWindowDimensions()
     const {Medication,setMedication}=useMedication(state=>state)
+    const [loading,setloading]=useState(true)
     const {user}=useUser()
     useEffect(()=>{
     async  function fetchData(){
 try {
+  setloading(true)
   if(user.email){
     const startDate = new Date();
     startDate.setHours(23, 59, 59, 999);
@@ -33,15 +36,18 @@ try {
 } catch (error:any) {
   console.log("Error",error)
   Snackbar.show({text: error.message || "Something went wrong", duration: Snackbar.LENGTH_SHORT, backgroundColor: 'red'})
-} 
+} finally{
+setloading(false)
+}
       }
       fetchData()
-    },[setMedication,user])
+    },[setMedication,user,Medication.length])
     if(Medication.length<=0){
      return(
       <NoMedication/>
      ) 
     }
+
   return (
     <ScrollView contentContainerStyle={{ flexGrow: 1 ,paddingBottom:80}}
     showsVerticalScrollIndicator={false}>
@@ -55,15 +61,16 @@ try {
         {/* list of medicines  */}
 
 {
-    (Medication && Medication.length<=0)?
+   (Medication && Medication.length<=0)?
     <>
-    <NoMedication/>
-    </>
+  {(loading)?<Loading/>:  <NoMedication/>}
+  </>
     :
-    <ListMedicines/>
-    }
+    <>
+      {loading ? <Loading /> : <ListMedicines />}
+    </>
 
-
+}
         </View>
         
     </View>

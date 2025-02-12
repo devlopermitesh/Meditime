@@ -38,6 +38,7 @@ const Signup = ({navigation}:SignupScreenProps) => {
               text: 'Signup success',
               duration: Snackbar.LENGTH_SHORT
             })
+            navigation.navigate('Login')
           }
         })
         .catch(e => {

@@ -11,6 +11,7 @@ const Login = ({navigation}:LoginScreenProps) => {
   const [email, setEmail] = React.useState<string>('')
   const [password, setPassword] = React.useState<string>('')
   const [error, setError] = React.useState<string>('');
+  
   const handleLogin = () => {
     if (email.length < 1 || password.length < 1) {
       setError('All fields are required')
