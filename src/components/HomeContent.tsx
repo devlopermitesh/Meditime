@@ -15,12 +15,13 @@ const HomeContent = () => {
     const {Medication,setMedication}=useMedication(state=>state)
     const [loading,setloading]=useState(true)
     const {user}=useUser()
+    const {CurrentDate}=useMedication(state=>state)
     useEffect(()=>{
     async  function fetchData(){
 try {
   setloading(true)
   if(user.email){
-    const startDate = new Date();
+    const startDate = CurrentDate;
     startDate.setHours(23, 59, 59, 999);
 
     const endDate = new Date(startDate);

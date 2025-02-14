@@ -28,10 +28,8 @@ const getDaysInMonth = (year: number, month: number): { Day: string, Date: strin
 const Calendar: React.FC = () => {
   const [currentMonth] = useState<number>(new Date().getMonth());
   const [currentYear] = useState<number>(new Date().getFullYear());
-  const currentDate = new Date().getDate().toString();
   const {user}=useUser(state=>state)
-  const {updateCurrentDate,setMedication}=useMedication(state=>state)
-  const [activatedate,setactivateddate]=useState<number>(new Date().getDate())
+  const {CurrentDate,updateCurrentDate,setMedication}=useMedication(state=>state)
 
   const daysInMonth = getDaysInMonth(currentYear, currentMonth);
   const flatListRef = useRef<FlatList>(null);
@@ -41,7 +39,6 @@ const Calendar: React.FC = () => {
     updateCurrentDate(selectedDate)
     selectedDate.setHours(23, 59, 59, 999); 
     selectedDate.setDate(selectedDate.getDate()); 
-    
     const nextDate = new Date(selectedDate);
     nextDate.setDate(selectedDate.getDate() + 1);
   
@@ -49,7 +46,7 @@ const Calendar: React.FC = () => {
       const response = await MedicationService.getdateMedications(user.email, selectedDate, nextDate);
       if (response) {
        setMedication(response)
-       setactivateddate(date)
+       updateCurrentDate(selectedDate)
       }
     } catch (error) {
       console.log(error);
@@ -62,7 +59,7 @@ const Calendar: React.FC = () => {
       return null;   
     }
 
-    const isActive = Number(item.Date) === activatedate;
+    const isActive = Number(item.Date) === CurrentDate.getDate();
 
     return (
       <TouchableOpacity 
@@ -79,11 +76,11 @@ const Calendar: React.FC = () => {
     );
   };
   useEffect(() => {
-    const activeIndex = daysInMonth.findIndex(item => item.Date === currentDate);
+    const activeIndex = daysInMonth.findIndex(item => item.Date === CurrentDate.getDate().toString());
     if (activeIndex !== -1 && flatListRef.current) {
-      flatListRef.current.scrollToIndex({ index: activeIndex, animated: true });
+      flatListRef.current.scrollToIndex({ index: activeIndex-6, animated: true });
     }
-  }, [currentDate, daysInMonth]);
+  }, [CurrentDate, daysInMonth]);
 
   return (
     <View style={styles.container}>

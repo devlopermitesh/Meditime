@@ -21,14 +21,15 @@ import { RootStackParamAppList } from '../routes/AppStack';
     onPress={() =>{
       
 const todayMidnight =CurrentDate.setHours(0, 0, 0, 0);
-const tommorowMidnight=CurrentDate.setHours(23, 0, 0, 0);
+const tommorowMidnight=CurrentDate.setHours(23, 59, 59, 999);
 const reminderTime = new Date(item.ReminderTime).getTime();
-
 const IsPrevious = reminderTime < todayMidnight; // Past
 const IsToday = reminderTime >= todayMidnight && reminderTime < tommorowMidnight; // Same Day (Before Current Time)
 const IsFuture = reminderTime >= tommorowMidnight; // Future
 
 if (IsPrevious) {
+
+
   Alert.alert(
     "⏰ Uh-oh! You can't take medicine before there time! 💕",
     "",

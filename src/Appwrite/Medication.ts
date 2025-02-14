@@ -235,11 +235,13 @@ export class MedicationManager {
         const doseStartTime = new Date(medication.DosestartTime).getTime();
         return doseEndTime >= end && doseStartTime <= start;
       });
+      if(filteredMedications.length==0) return [];
   
       // Fetch current taken status
       const updatedMedications = await this.setCurrentTaken(startDate, filteredMedications);
   
       console.log(`Current date: ${new Date().toISOString()}, Medications Status:`, updatedMedications);
+
   
       return updatedMedications.length ? updatedMedications : [];
     } catch (error) {
