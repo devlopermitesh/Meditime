@@ -11,7 +11,12 @@ import { motivationalLines } from '../constant'
 import useMedication from '../Store/Medication'
 import axios from 'axios';
 import report from '../Appwrite/Report'
+import Sound from 'react-native-sound';
 type DetailsProps = NativeStackScreenProps<RootStackParamAppList, "TakeMedicine">
+enum audioName{
+  success="success",
+  error='error'
+}
 const getMotivationalLine = ():string => motivationalLines[Math.floor(Math.random() * motivationalLines.length)];
 const TakeMedicine = ({navigation,route}:DetailsProps) => {
   const [item, setItem] = React.useState<Medication | null>(null);
@@ -36,6 +41,34 @@ async function fetchItem(ID:string) {
 }
 fetchItem(ID)
     },[ID,setItem])
+
+const successSound=()=>{
+  const sound = new Sound('success.mp3', Sound.MAIN_BUNDLE, (error) => {
+    if (error) {
+        console.log('Error loading sound:', error);
+        return;
+    }
+    sound.play(() => {
+        sound.release(); 
+    });
+});
+
+}
+
+
+const errorSound=()=>{
+  const sound = new Sound('error.mp3', Sound.MAIN_BUNDLE, (error) => {
+    if (error) {
+        console.log('Error loading sound:', error);
+        return;
+    }
+    sound.play(() => {
+        sound.release(); 
+    });
+});
+
+}
+
     const formatTime = (timeString: string) => {
       const date = new Date(timeString);
       return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -47,7 +80,6 @@ fetchItem(ID)
       return date.toLocaleDateString(); // Default format "mm/dd/yyyy"
     };
 
-
     const Taken=async()=>{
 try {
  
@@ -57,6 +89,7 @@ try {
     changeStatus(response.data)
     updateReport(true)
     updatestatus()
+    successSound()
     Snackbar.show({text: `Medication marked as ${item?.Todaystatus ? "Not Taken":"Taken" }`, duration: Snackbar.LENGTH_SHORT, backgroundColor: 'green'})
     navigation.goBack()
   }
@@ -113,6 +146,9 @@ try {
           { cancelable: false }
         );
         await updateReport(false);
+        await updatestatus()
+     errorSound()
+
       } catch (error) {
         console.log(error);
         Alert.alert("Error", "Something went wrong, please try again later", [
