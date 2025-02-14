@@ -126,7 +126,6 @@ async getFilteredReports(userId: string, option: string, optionName: Options) {
         case Options.Date:
 
           const date = new Date(option).toISOString()
-          console.log("Report for the date :", date);
 
           queries.push(Query.equal('ReportDate', date));
           break;

@@ -11,7 +11,6 @@ import messaging from '@react-native-firebase/messaging';
 
 messaging().setBackgroundMessageHandler(async remoteMessage => {
 try {
-console.log('Message handled in the background!', remoteMessage);
 // You can add any background handling logic here
 } catch (error) {
 console.error('Error in background message handler:', error);

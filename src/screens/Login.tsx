@@ -6,7 +6,6 @@ import { AppwriteContext } from '../Appwrite/AppwriteContext'
 import Snackbar from 'react-native-snackbar'
 type LoginScreenProps = NativeStackScreenProps<AuthStackParamList, 'Login'>
 const Login = ({navigation}:LoginScreenProps) => {
-  // console.log("hi i am login")
   const {appwrite, setIsloggedIn} = React.useContext(AppwriteContext)
   const [email, setEmail] = React.useState<string>('')
   const [password, setPassword] = React.useState<string>('')
@@ -22,7 +21,6 @@ const Login = ({navigation}:LoginScreenProps) => {
       .then((response) => {
         if (response) {
           setIsloggedIn(true);
-          console.log("response ",response)
           Snackbar.show({
             text: 'Login Success',
             duration: Snackbar.LENGTH_SHORT

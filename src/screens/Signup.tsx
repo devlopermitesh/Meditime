@@ -32,7 +32,6 @@ const Signup = ({navigation}:SignupScreenProps) => {
         .signup({email, username:name, password})
         .then((response:any) => {
           if (response) {
-            console.log("signup response is ",response);
             // setIsloggedIn(true)
             Snackbar.show({
               text: 'Signup success',
